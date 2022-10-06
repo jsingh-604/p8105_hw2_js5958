@@ -1,9 +1,9 @@
 ---
 title: "P8105 HW2 | Jagjit Singh | ID: js5958"
 output: github_document
-date: "2022-10-02"
 ---
 
+Loading required packages:
 ```{r}
 library(tidyverse)
 library(readxl)
@@ -11,7 +11,7 @@ library(dplyr)
 ```
 
 
-### Problem 1
+# Problem 1
 
 Below we import and clean data from `NYC_Transit_Subway_Entrance_And_Exit_Data.csv`. The process begins with data import, updates variable names, and selects the columns that will be used in later parts fo this problem. We update `entry` from `yes` / `no` to a logical variable. As part of data import, we specify that `Route` columns 8-11 should be character for consistency with 1-7.
 
@@ -102,6 +102,7 @@ df_trash <- read_excel("trash_data.xlsx",
 df_trash <-
     df_trash %>%
     janitor::clean_names() %>%
+    drop_na(dumpster)  %>%
     mutate(type_trash = "Mr.Trash", #new column
          volume_cubic_yards = as.character(volume_cubic_yards),
          plastic_bottles = as.character(plastic_bottles),
@@ -128,12 +129,13 @@ df_trash <-
 df_trash
 ```
 
-Reading professor trash wheel:
+Reading Professor Trash Wheel:
 ```{r}
 pf_trash <- read_excel("trash_data.xlsx",
     sheet = "Professor Trash Wheel",
     range = "A2:M96") %>%
   janitor::clean_names() %>%
+  drop_na(dumpster) %>%
   mutate(type_trash = "Pr.Trash", #new column
          sports_balls = 0,
          date = as.Date(date),
@@ -185,20 +187,20 @@ d = dim(merged_df) #dimensions
 vars = merged_df %>% names()
 ```
 
-The dimension of the merged data (Mr Trash Wheel and Professor Trash Wheel) is (**`r d `**) (number of rows, number of columns) and variable names are **`r vars `**.
+The dimension of the merged data (Mr Trash Wheel and Professor Trash Wheel) is (**`r d `**) (number of rows, number of columns) and key variables are **`r vars `**.
 
 
 # Problem 3
 
-Importing and cleaning the pols-months from the FiveThirtyEight folder
+Importing and cleaning the pols-months from the FiveThirtyEight folder:
 ```{r}
 pol_df <- 
   read_csv("/Users/jag/Downloads/fivethirtyeight_datasets/pols-month.csv") %>%
   janitor::clean_names()
+```
 
-
-#Use separate() to break up the variable mon into integer variables year, 
-#month, and day
+Using separate() to break up the variable mon into integer variables year, month, and day 
+```{r}
 pol_df <- pol_df%>%
   separate(col = mon, into = c("year","month", "day")) %>%
   mutate(across(.cols = c(year, month, day), as.integer)) %>%
@@ -217,7 +219,7 @@ pol_df <- pol_df%>%
 
 ```
 
-Importing and cleaning the snp data
+Importing and cleaning the snp data:
 ```{r}
 snp_df <- 
   read_csv("/Users/jag/Downloads/fivethirtyeight_datasets/snp.csv") %>%
@@ -237,7 +239,7 @@ snp_df <- snp_df %>%
 
 ```
 
-Importing and cleaning the unemployment data
+Importing and cleaning the unemployment data:
 
 ```{r}
 #### First we will clean the column names ####
@@ -270,34 +272,36 @@ pol_snp_df <- left_join(pol_df, snp_df, by = c("year", "month"))
 net_df <-left_join(pol_snp_df, ue_df, by = c("year", "month"))
 ```
 
-Now we will describe hese dataset and explain briefly what each dataset contained, and describe the resulting dataset:
 
+#### Now we will describe the 3 datasets and explain briefly what each dataset contained. Following that is a description of the merged dataset
+
+The pols-months dataset: 
 ```{r}
 head(pol_df)
 d = dim(pol_df) #dimensions
 vars = pol_df %>% names()
 range = pol_df %>% select(year) %>% range()
 ```
-The dimension of the dataset is (**`r d `**) (number of rows, number of columns). It is essentially data on the number of candidates of the democratic and republican parties, who were in gop, sen, or gov positions. The specific variables names being **`r vars `**. The dataset contains data for years ranging **`r range `**.
+The dimension of the dataset is (**`r d `**) (number of rows, number of columns). It is essentially data on the number of candidates of the democratic and republican parties, who were in gop, sen, or gov positions. The important variables names being **`r vars `**. The dataset contains data for years ranging **`r range `**.
 
 
-The stock market dataset 
+The snp dataset:
 ```{r}
 head(snp_df)
 d = dim(snp_df) #dimensions
 vars = snp_df %>% names()
 range = snp_df %>% select(year) %>% range()
 ```
-This dataset contains data from monthly close prices of the S&P 500 market index. The variables being **`r vars `** . The price column is the close price for the given month. The dataset contains monthly close price for years ranging **`r range `**. The dimension of the dataset is (**`r d `**)(number of rows, number of columns).
+The snp dataset contains data from monthly close prices of the S&P 500 market index. The important variables being **`r vars `** . The price column is the close price for the given month. The dataset contains monthly close price for years with range (**`r range `**). The dimension of the dataset is (**`r d `**)(number of rows, number of columns).
 
-Unemployment dataset
+The unemployment dataset:
 ```{r}
 head(ue_df)
 d = dim(ue_df) #dimensions
 vars = ue_df %>% names()
 range = ue_df %>% select(year) %>% range()
 ```
-Finally, the employment dataset contains percentage unemployment in monthly terms for years ranging  (**`r range `**) . The dimension of the dataset is (**`r d `**)(number of rows, number of columns) and the variable names are **`r vars `**.
+Finally, the employment dataset contains percentage unemployment in monthly terms for years ranging  (**`r range `**) . The dimension of the dataset is (**`r d `**) (number of rows, number of columns) and the important variable names are **`r vars `**.
 
 
 
@@ -306,4 +310,4 @@ net_name = net_df %>% names()
 d = dim(net_df)
 net_range =  net_df %>% select(year) %>% range()
 ```
-The dimension of the merged dataset is **`r d `**. The important variables are **`r net_name `**. It contains data for years ranging (**`r net_range `**)
+The dimension of the merged dataset is (**`r d `**) (number of rows, number of columns). The important variables are **`r net_name `**. It contains data for years ranging (**`r net_range `**)
